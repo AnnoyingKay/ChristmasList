@@ -64,6 +64,12 @@
   .item .t2 { color:var(--mute); font-size:13px; margin-top:1px; overflow-wrap:anywhere; }
   .item .pr { font-weight:650; white-space:nowrap; }
   .item.got .t1, .item.got .pr { text-decoration:line-through; color:var(--mute); }
+  .item .thumb { flex:none; width:54px; height:54px; border-radius:12px; object-fit:cover; background:#efe3d0; border:1px solid var(--line); }
+  .item .open { flex:none; width:32px; height:32px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--line); background:#fff; text-decoration:none; }
+  .item .open svg { width:15px; height:15px; stroke:var(--green); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .prev { display:flex; align-items:center; gap:12px; margin-top:10px; min-height:0; }
+  .prev img { width:72px; height:72px; border-radius:14px; object-fit:cover; border:1px solid var(--line); background:#efe3d0; }
+  .prev span { color:var(--mute); font-size:13px; }
   .empty { text-align:center; color:var(--mute); padding:36px 10px; }
   .fab { position:fixed; left:50%; bottom:max(20px, env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--red); color:#fff; border:0; border-radius:999px; padding:15px 26px; font-weight:700; font-size:16px; box-shadow:0 10px 22px rgba(179,57,47,.35); cursor:pointer; }
 
@@ -72,7 +78,7 @@
   .sheet { width:100%; max-width:560px; background:var(--paper); border-radius:26px 26px 0 0; padding:20px 20px max(22px, env(safe-area-inset-bottom)); max-height:92vh; overflow:auto; }
   .sheet h3 { margin:0 0 14px; font-family:Georgia,serif; font-size:22px; }
   label { display:block; font-size:13px; font-weight:650; color:var(--mute); margin:12px 0 5px; }
-  input[type=text], input[inputmode=decimal] { width:100%; font:inherit; padding:13px 14px; border-radius:14px; border:1.5px solid var(--line); background:#fff; color:var(--ink); }
+  input[type=text], input[type=url], input[inputmode=decimal] { width:100%; font:inherit; padding:13px 14px; border-radius:14px; border:1.5px solid var(--line); background:#fff; color:var(--ink); }
   input:focus { outline:none; border-color:var(--green); }
   .row2 { display:grid; grid-template-columns:1fr 130px; gap:10px; }
   .btns { display:flex; gap:10px; margin-top:20px; }
@@ -107,7 +113,7 @@
 'use strict';
 const FB_VER = '10.14.1';
 const COLLECTION = 'xmas';
-const APP_VERSION = '1.0.1';
+const APP_VERSION = '1.1.2';
 const APP_DATE = '2026-11-18';
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyCgVHwUEbDsp_DiyAWbIaHW7b5LS7MRwNM",
@@ -186,14 +192,50 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&am
 const eur = n => new Intl.NumberFormat('en-IE', { style:'currency', currency:'EUR' }).format(n);
 const YEAR = new Date().getFullYear();
 const CHECK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const OPEN = '<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
 const COG = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
 
-const S = { user:null, items:[], screen:'loading', profile:'', fromCache:false, synced:null, err:'', sheet:null, sure:false };
+const S = { user:null, items:[], screen:'loading', profile:'', fromCache:false, synced:null, err:'', sheet:null, sure:false, draft:{ link:'', image:'', for:'', busy:false } };
 let fb = null, unsub = null;
 
 const forPerson = id => S.items.filter(i => i.year === YEAR && i.profile === id).sort((a, b) => (a.createdMs || 0) - (b.createdMs || 0));
 const totalOf = list => list.reduce((s, i) => s + (i.price || 0), 0);
 const hhmm = d => d.toLocaleTimeString('en-IE', { hour:'2-digit', minute:'2-digit' });
+function safeUrl(u) { try { const x = new URL(String(u || '')); return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href : ''; } catch (e) { return ''; } }
+function normaliseLink(v) {
+  v = String(v || '').trim(); if (!v) return '';
+  if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+  return safeUrl(v);
+}
+const PREVIEW_API = 'https://api.microlink.io/?url=';
+async function fetchPreview(link) {
+  const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 9000);
+  try {
+    const r = await fetch(PREVIEW_API + encodeURIComponent(link), { signal:ctl.signal });
+    const j = await r.json();
+    const d = j && j.data ? j.data : {};
+    const img = (d.image && d.image.url) || '';
+    return { image: safeUrl(img).startsWith('https:') ? safeUrl(img) : '', title: d.title || '', publisher: d.publisher || '' };
+  } catch (e) { return null; } finally { clearTimeout(timer); }
+}
+async function previewFromField() {
+  const f = $('#fLink'); if (!f) return;
+  const link = normaliseLink(f.value);
+  const box = $('#fPrev');
+  if (!link) { S.draft = { link:'', image:'', for:'', busy:false }; if (box) box.innerHTML = ''; return; }
+  if (S.draft.for === link) return;
+  S.draft = { link, image:'', for:link, busy:true };
+  box.innerHTML = '<span>Looking for a picture…</span>';
+  const res = await fetchPreview(link);
+  if (S.draft.for !== link || !$('#fLink')) return;       /* the link changed or the sheet closed meanwhile */
+  S.draft.busy = false;
+  if (!res) { box.innerHTML = '<span>Could not get a preview. You can still save it.</span>'; return; }
+  S.draft.image = res.image;
+  const nm = $('#fName'), se = $('#fSeller');
+  if (nm && !nm.value.trim() && res.title) nm.value = res.title.slice(0, 120);
+  if (se && !se.value.trim() && res.publisher) se.value = res.publisher.slice(0, 80);
+  box.innerHTML = res.image ? `<img src="${esc(res.image)}" alt="" referrerpolicy="no-referrer"><span>Picture found</span>` : '<span>No picture found. You can still save it.</span>';
+}
 function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; $('#toastHost').appendChild(t); setTimeout(() => t.remove(), 2200); }
 
 /* ---------- Firebase ---------- */
@@ -265,7 +307,9 @@ function profileHTML(p) {
   if (got) bits.push(got + ' got');
   const rows = it.map(i => `<li class="item${i.bought ? ' got' : ''}">
       <button class="tick" data-act="tick" data-id="${esc(i.id)}" aria-label="${i.bought ? 'Mark as not got' : 'Mark as got'}">${CHECK}</button>
+      ${safeUrl(i.image) ? `<img class="thumb" src="${esc(safeUrl(i.image))}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}
       <button class="txt" data-act="edit" data-id="${esc(i.id)}"><div class="t1">${esc(i.name)}</div>${i.seller ? `<div class="t2">${esc(i.seller)}</div>` : ''}</button>
+      ${safeUrl(i.link) ? `<a class="open" href="${esc(safeUrl(i.link))}" target="_blank" rel="noopener noreferrer" aria-label="Open link">${OPEN}</a>` : ''}
       ${i.price != null ? `<div class="pr">${eur(i.price)}</div>` : ''}</li>`).join('');
   return `<div class="wrap"><a class="back" href="#">‹ All lists</a>
     <div class="who"><div class="av" style="background:var(--cream)">${ART[p.id]()}</div><div><h2>${esc(p.name)}</h2><p>${bits.join(' · ')}</p></div></div>
@@ -273,10 +317,13 @@ function profileHTML(p) {
     <button class="fab" data-act="add">+ Add an idea</button>`;
 }
 
-function renderSheet() {
+function renderSheet(force) {
   const host = $('#sheetHost');
   const sh = S.sheet;
-  if (!sh) { host.innerHTML = ''; return; }
+  if (!sh) { host.innerHTML = ''; host.dataset.key = ''; return; }
+  const key = JSON.stringify(sh) + '|' + S.sure;
+  if (!force && host.dataset.key === key && host.firstChild) return;   /* a sync arriving mid typing must not wipe the form */
+  host.dataset.key = key;
   if (sh.mode === 'settings') {
     host.innerHTML = `<div class="veil" data-act="close"><div class="sheet" role="dialog" aria-label="Settings">
       <h3>Settings</h3>
@@ -293,12 +340,16 @@ function renderSheet() {
   const person = PEOPLE.find(x => x.id === S.profile);
   host.innerHTML = `<div class="veil" data-act="close"><form class="sheet" id="itemForm" role="dialog" aria-label="${edit ? 'Edit idea' : 'Add an idea'}" autocomplete="off">
     <h3>${edit ? 'Edit idea' : 'Add an idea for ' + esc(person ? person.name : '')}</h3>
+    <label for="fLink">Link (optional)</label><input type="text" id="fLink" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="600" placeholder="Paste a web address" value="${esc(edit ? edit.link : '')}">
+    <div class="prev" id="fPrev">${edit && safeUrl(edit.image) ? `<img src="${esc(safeUrl(edit.image))}" alt="" referrerpolicy="no-referrer">` : ''}</div>
     <label for="fName">What is it?</label><input type="text" id="fName" maxlength="120" required value="${esc(edit ? edit.name : '')}">
     <div class="row2"><div><label for="fSeller">Seller</label><input type="text" id="fSeller" maxlength="80" placeholder="Shop or website" value="${esc(edit ? edit.seller : '')}"></div>
     <div><label for="fPrice">Price (€)</label><input type="text" inputmode="decimal" id="fPrice" maxlength="9" placeholder="0.00" value="${edit && edit.price != null ? esc(String(edit.price)) : ''}"></div></div>
     <div class="err" id="formErr"></div>
     <div class="btns">${edit ? `<button type="button" class="btn del${S.sure ? ' sure' : ''}" data-act="delete">${S.sure ? 'Tap again to delete' : 'Delete'}</button>` : ''}
       <button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn pri">Save</button></div></form></div>`;
+  S.draft = { link: edit && edit.link ? edit.link : '', image: edit && edit.image ? edit.image : '', for: edit && edit.link ? edit.link : '', busy:false };
+  const lk = $('#fLink'); if (lk) { lk.addEventListener('input', () => { clearTimeout(window.__pv); window.__pv = setTimeout(previewFromField, 700); }); lk.addEventListener('change', previewFromField); lk.addEventListener('paste', () => setTimeout(previewFromField, 60)); }
   const n = $('#fName'); if (n && !edit) setTimeout(() => n.focus(), 50);
 }
 
@@ -313,7 +364,12 @@ async function saveItem(e) {
   e.preventDefault();
   const name = $('#fName').value.trim();
   if (!name) { $('#formErr').textContent = 'Please add a name.'; return; }
-  const data = { name, seller: $('#fSeller').value.trim(), price: parsePrice($('#fPrice').value), updatedMs: Date.now() };
+  const rawLink = $('#fLink').value.trim();
+  const link = normaliseLink(rawLink);
+  if (rawLink && !link) { $('#formErr').textContent = 'That link does not look right.'; return; }
+  if (link && S.draft.busy) { $('#formErr').textContent = 'Still looking for the picture. Try again in a moment.'; return; }
+  const image = link && S.draft.for === link ? S.draft.image : '';
+  const data = { name, seller: $('#fSeller').value.trim(), price: parsePrice($('#fPrice').value), link, image, updatedMs: Date.now() };
   const sh = S.sheet;
   try {
     if (sh.mode === 'edit') await fb.F.updateDoc(ref(sh.id), data);
@@ -327,15 +383,15 @@ document.addEventListener('click', async ev => {
   const t = ev.target.closest('[data-act]'); if (!t) return;
   const act = t.dataset.act;
   if (act === 'close') { if (ev.target !== t && t.classList.contains('veil')) return; closeSheet(); return; }
-  if (act === 'add') { S.sheet = { mode:'add' }; S.sure = false; renderSheet(); }
-  else if (act === 'edit') { S.sheet = { mode:'edit', id:t.dataset.id }; S.sure = false; renderSheet(); }
-  else if (act === 'settings') { S.sheet = { mode:'settings' }; renderSheet(); }
+  if (act === 'add') { S.sheet = { mode:'add' }; S.sure = false; renderSheet(true); }
+  else if (act === 'edit') { S.sheet = { mode:'edit', id:t.dataset.id }; S.sure = false; renderSheet(true); }
+  else if (act === 'settings') { S.sheet = { mode:'settings' }; renderSheet(true); }
   else if (act === 'tick') {
     const it = S.items.find(i => i.id === t.dataset.id); if (!it) return;
     try { await fb.F.updateDoc(ref(it.id), { bought:!it.bought, updatedMs:Date.now() }); } catch (e) { toast('Could not update'); }
   }
   else if (act === 'delete') {
-    if (!S.sure) { S.sure = true; renderSheet(); return; }
+    if (!S.sure) { S.sure = true; const keep = { n:$('#fName').value, s:$('#fSeller').value, p:$('#fPrice').value, l:$('#fLink').value }; renderSheet(true); $('#fName').value = keep.n; $('#fSeller').value = keep.s; $('#fPrice').value = keep.p; $('#fLink').value = keep.l; return; }
     try { await fb.F.deleteDoc(ref(S.sheet.id)); closeSheet(); } catch (e) { toast('Could not delete'); }
   }
   else if (act === 'sync') { listen(); toast('Syncing'); setTimeout(() => { const s = $('#syncTxt'); if (s) s.textContent = S.fromCache ? 'Saved copy' : (S.synced ? 'Synced at ' + hhmm(S.synced) : ''); }, 900); }
@@ -351,6 +407,7 @@ document.addEventListener('click', async ev => {
     catch (e) { if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request' && err) err.textContent = 'Sign in failed. Allow pop ups for this site and try again.'; }
   }
 });
+document.addEventListener('error', ev => { const t = ev.target; if (t && t.tagName === 'IMG' && (t.classList.contains('thumb') || t.closest('.prev'))) t.style.display = 'none'; }, true);
 document.addEventListener('submit', ev => { if (ev.target.id === 'itemForm') saveItem(ev); });
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && S.sheet) closeSheet(); });
 function route() { const h = location.hash.slice(1); S.profile = PEOPLE.some(p => p.id === h) ? h : ''; if (S.screen === 'app') window.scrollTo(0, 0); render(); }

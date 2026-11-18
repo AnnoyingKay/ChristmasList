@@ -1,6 +1,6 @@
-CHRISTMAS v1.0.1 (2026-11-18)
+CHRISTMAS v1.1.2 (2026-11-18)
 
-A shared list of gift ideas. Four cards: Raul, Amparo, Mateo and Mario. Open a card, tap Add an idea, and fill in the name, seller and price. Tap the circle when something has been bought. Tap an item to edit or delete it.
+A shared list of gift ideas. Four cards: Raul, Amparo, Mateo and Mario. Open a card, tap Add an idea, and fill in the name, seller and price. Paste a web address into Link and the app looks for a picture, and fills in the name and shop if they are empty. Tap the circle when something has been bought. Tap an item to edit or delete it.
 
 Files for a NEW repository (root): index.html, sw.js, manifest.webmanifest, icon-192.png, icon-512.png
 
@@ -14,6 +14,7 @@ Files for a NEW repository (root): index.html, sw.js, manifest.webmanifest, icon
 Sign in with the same two Google accounts as Musicbox and SavePoint.
 
 Notes
+- Pictures come from a free preview service called Microlink (api.microlink.io). The link you paste is sent to it, nothing else. The free allowance is about 50 lookups a day, which is plenty for a family list. Some shops block previews; the item still saves, just without a picture. Only the picture's web address is stored, so a shop can later remove it.
 - Only the current year's ideas show. Last year's stay in the database and are included in Export backup.
 - Both accounts see every list. If you want a list to hide ideas from its owner (for surprises), that can be added.
 - Rules: the Christmas block is in the master firestore.rules in the Libraries repository. Do not keep a copy in this repository.
