@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en-IE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#b3392f">
+<title>Christmas</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root { --cream:#f7efe4; --paper:#fffaf2; --red:#b3392f; --green:#2f5d50; --gold:#d9a441; --ink:#2b2118; --mute:#7d6b5b; --line:#e6d8c5; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; background:var(--cream); color:var(--ink); font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { min-height:100vh; background:
+      radial-gradient(circle at 12% 8%, rgba(255,255,255,.9) 0 2px, transparent 3px),
+      radial-gradient(circle at 80% 14%, rgba(255,255,255,.9) 0 3px, transparent 4px),
+      radial-gradient(circle at 92% 60%, rgba(255,255,255,.9) 0 2px, transparent 3px),
+      radial-gradient(circle at 6% 70%, rgba(255,255,255,.9) 0 3px, transparent 4px),
+      var(--cream); }
+  h1, h2, .nm { font-family:Georgia,"Times New Roman",serif; }
+  button { font:inherit; color:inherit; }
+  .wrap { max-width:560px; margin:0 auto; padding:max(18px, env(safe-area-inset-top)) 18px 110px; }
+  .hide { display:none !important; }
+
+  header.top { display:flex; align-items:center; justify-content:space-between; margin:6px 0 18px; }
+  header.top h1 { margin:0; font-size:30px; color:var(--red); letter-spacing:.2px; }
+  header.top h1 small { font:600 14px system-ui,sans-serif; color:var(--mute); margin-left:6px; letter-spacing:0; }
+  .iconbtn { width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:var(--paper); display:grid; place-items:center; cursor:pointer; }
+  .iconbtn svg { width:20px; height:20px; stroke:var(--ink); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* the four cards */
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .card { position:relative; display:flex; flex-direction:column; border-radius:24px; text-decoration:none; color:var(--ink); overflow:hidden; padding:0 0 14px; box-shadow:0 8px 18px rgba(80,50,20,.14); transition:transform .15s; }
+  .card:active { transform:scale(.98); }
+  .card .art { display:block; padding:10px 10px 0; }
+  .card .art svg { display:block; width:100%; height:auto; }
+  .card .nm { font-size:22px; font-weight:700; padding:0 16px; }
+  .card .sub { font-size:13px; color:rgba(43,33,24,.7); padding:0 16px; }
+  .card.raul   { background:linear-gradient(160deg,#e4f1de,#bcd8c6); }
+  .card.amparo { background:linear-gradient(160deg,#fde8da,#f5c3ac); }
+  .card.mateo  { background:linear-gradient(160deg,#e0eefb,#b5d3ec); }
+  .card.mario  { background:linear-gradient(160deg,#fdf3d2,#f5d995); }
+  .card .art svg { animation:bob 5s ease-in-out infinite; transform-origin:50% 100%; }
+  .card.amparo .art svg { animation-delay:-1.2s; } .card.mateo .art svg { animation-delay:-2.4s; } .card.mario .art svg { animation-delay:-3.6s; }
+  @keyframes bob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+  .status { text-align:center; color:var(--mute); font-size:13px; margin:20px 0 0; }
+
+  /* a person's list */
+  .back { display:inline-flex; align-items:center; gap:4px; color:var(--green); font-weight:600; text-decoration:none; margin:2px 0 10px; padding:6px 10px 6px 0; }
+  .who { display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+  .who .av { width:72px; height:72px; border-radius:22px; overflow:hidden; flex:none; }
+  .who .av svg { width:100%; height:100%; display:block; }
+  .who h2 { margin:0; font-size:30px; }
+  .who p { margin:2px 0 0; color:var(--mute); font-size:14px; }
+  ul.items { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .item { display:flex; align-items:center; gap:12px; background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:12px 14px; }
+  .tick { flex:none; width:28px; height:28px; border-radius:50%; border:2px solid var(--gold); background:#fff; display:grid; place-items:center; cursor:pointer; padding:0; }
+  .tick svg { width:16px; height:16px; stroke:#fff; stroke-width:3; fill:none; opacity:0; stroke-linecap:round; stroke-linejoin:round; }
+  .item.got .tick { background:var(--green); border-color:var(--green); }
+  .item.got .tick svg { opacity:1; }
+  .item .txt { flex:1; min-width:0; text-align:left; background:none; border:0; padding:0; cursor:pointer; }
+  .item .t1 { font-weight:650; overflow-wrap:anywhere; }
+  .item .t2 { color:var(--mute); font-size:13px; margin-top:1px; overflow-wrap:anywhere; }
+  .item .pr { font-weight:650; white-space:nowrap; }
+  .item.got .t1, .item.got .pr { text-decoration:line-through; color:var(--mute); }
+  .empty { text-align:center; color:var(--mute); padding:36px 10px; }
+  .fab { position:fixed; left:50%; bottom:max(20px, env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--red); color:#fff; border:0; border-radius:999px; padding:15px 26px; font-weight:700; font-size:16px; box-shadow:0 10px 22px rgba(179,57,47,.35); cursor:pointer; }
+
+  /* sheets */
+  .veil { position:fixed; inset:0; background:rgba(43,33,24,.45); display:flex; align-items:flex-end; justify-content:center; z-index:20; }
+  .sheet { width:100%; max-width:560px; background:var(--paper); border-radius:26px 26px 0 0; padding:20px 20px max(22px, env(safe-area-inset-bottom)); max-height:92vh; overflow:auto; }
+  .sheet h3 { margin:0 0 14px; font-family:Georgia,serif; font-size:22px; }
+  label { display:block; font-size:13px; font-weight:650; color:var(--mute); margin:12px 0 5px; }
+  input[type=text], input[inputmode=decimal] { width:100%; font:inherit; padding:13px 14px; border-radius:14px; border:1.5px solid var(--line); background:#fff; color:var(--ink); }
+  input:focus { outline:none; border-color:var(--green); }
+  .row2 { display:grid; grid-template-columns:1fr 130px; gap:10px; }
+  .btns { display:flex; gap:10px; margin-top:20px; }
+  .btn { flex:1; padding:14px; border-radius:14px; border:1.5px solid var(--line); background:#fff; font-weight:650; cursor:pointer; }
+  .btn.pri { background:var(--green); border-color:var(--green); color:#fff; }
+  .btn.del { color:var(--red); border-color:#ecc3be; flex:none; }
+  .btn.del.sure { background:var(--red); color:#fff; border-color:var(--red); }
+  .sec { border-top:1px solid var(--line); margin-top:16px; padding-top: 4px; }
+  .kv { display:flex; justify-content:space-between; padding:10px 0; }
+  .kv span:first-child { color:var(--mute); }
+  .sheet .btn { margin-top:8px; width:100%; }
+  .err { color:var(--red); min-height:20px; font-size:14px; margin-top:10px; }
+
+  /* login and loading */
+  .center { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px; gap:10px; }
+  .center h1 { color:var(--red); font-size:38px; margin:0; }
+  .center p { color:var(--mute); margin:0 0 14px; max-width:320px; }
+  .center .row { display:flex; gap:10px; margin-bottom:12px; }
+  .center .row span { width:64px; height:64px; border-radius:20px; overflow:hidden; display:block; }
+  .center .row svg { width:100%; height:100%; display:block; }
+  .center .btn { flex:none; padding:14px 26px; }
+  .toast { position:fixed; left:50%; bottom:90px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:12px; font-size:14px; z-index:30; }
+  @media (prefers-reduced-motion: reduce) { .card .art svg { animation:none; } .card { transition:none; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="sheetHost"></div>
+<div id="toastHost"></div>
+
+<script>
+'use strict';
+const FB_VER = '10.14.1';
+const COLLECTION = 'xmas';
+const APP_VERSION = '1.0.1';
+const APP_DATE = '2026-11-18';
+const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCgVHwUEbDsp_DiyAWbIaHW7b5LS7MRwNM",
+    authDomain: "shelf-b5282.firebaseapp.com",
+    projectId: "shelf-b5282",
+    storageBucket: "shelf-b5282.firebasestorage.app",
+    messagingSenderId: "137353564152",
+    appId: "1:137353564152:web:5e78fb7a5d32cc5342d00d"
+  };
+
+/* ---------- the four people and their pictures ---------- */
+const SKIN = '#f6d3b3', INK = '#2b2118', BLUSH = '#f4a09a';
+const scene = (a, b, id) => `<defs><linearGradient id="ga${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${a}" stop-opacity="0"/></linearGradient>
+  <linearGradient id="gb${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${b}"/><stop offset="1" stop-color="${b}" stop-opacity="0"/></linearGradient></defs>
+  <path d="M0 100 Q34 90 66 106 T128 102 V121 H0Z" fill="url(#ga${id})"/><path d="M-4 108 Q40 98 84 110 T130 106 V121 H-4Z" fill="url(#gb${id})"/>
+  <circle cx="14" cy="18" r="2.4" fill="#fff" opacity=".9"/><circle cx="104" cy="14" r="3" fill="#fff" opacity=".9"/><circle cx="110" cy="46" r="2" fill="#fff" opacity=".9"/><circle cx="8" cy="52" r="2" fill="#fff" opacity=".9"/><circle cx="96" cy="30" r="1.8" fill="#fff" opacity=".9"/>`;
+const face = (cx, cy, r, eyeY, eyeR, mouthY) => `
+  <circle cx="${cx - 9}" cy="${eyeY}" r="${eyeR}" fill="${INK}"/><circle cx="${cx + 9}" cy="${eyeY}" r="${eyeR}" fill="${INK}"/>
+  <circle cx="${cx - 15}" cy="${eyeY + 8}" r="4.2" fill="${BLUSH}" opacity=".55"/><circle cx="${cx + 15}" cy="${eyeY + 8}" r="4.2" fill="${BLUSH}" opacity=".55"/>
+  <path d="M${cx - 6} ${mouthY} Q${cx} ${mouthY + 6} ${cx + 6} ${mouthY}" stroke="${INK}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+const ART = {
+  raul: () => `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${scene('#a9cdb7', '#8fbfa4', 'r')}
+    <path d="M24 122 Q24 86 60 82 Q96 86 96 122Z" fill="#5b8a72"/>
+    <path d="M70 94 L77 117 L66 115 L63 98Z" fill="#c4602f"/>
+    <rect x="53" y="74" width="14" height="12" fill="#f0c9a4"/>
+    <circle cx="37" cy="56" r="5" fill="#f2c9a5"/><circle cx="83" cy="56" r="5" fill="#f2c9a5"/>
+    <circle cx="60" cy="56" r="23" fill="${SKIN}"/>
+    <path d="M42 84 Q60 97 78 84 L80 95 Q60 107 40 95Z" fill="#c4602f"/>
+    <path d="M37 50 Q35 40 40 38 Q46 46 60 44 Q74 46 80 38 Q85 40 83 50 Q74 44 60 46 Q46 44 37 50Z" fill="#4a3426"/>
+    <path d="M36 47 Q36 22 60 22 Q84 22 84 47 Q60 39 36 47Z" fill="#b3392f"/>
+    <rect x="34" y="43" width="52" height="9" rx="4.5" fill="#f7efe4"/><circle cx="60" cy="20" r="6" fill="#f7efe4"/>
+    ${face(60, 56, 23, 58, 2.4, 66)}</svg>`,
+  amparo: () => `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${scene('#f2b99c', '#eaa586', 'a')}
+    <path d="M33 58 Q28 22 60 22 Q92 22 87 58 L91 102 Q76 108 72 88 L48 88 Q44 108 29 102Z" fill="#6b3f2a"/>
+    <path d="M26 122 Q26 90 60 86 Q94 90 94 122Z" fill="#b3392f"/>
+    <rect x="53" y="76" width="14" height="12" fill="#f0c9a4"/>
+    <circle cx="60" cy="58" r="22" fill="${SKIN}"/>
+    <path d="M38 54 Q40 33 60 33 Q80 33 82 54 Q72 43 62 43 Q50 45 38 54Z" fill="#6b3f2a"/>
+    <path d="M72 35 Q80 26 89 32 Q81 41 72 35Z" fill="#3f7a5e"/><path d="M76 39 Q81 28 91 36 Q83 45 76 39Z" fill="#2f5d50"/>
+    <circle cx="76" cy="37" r="3" fill="#d6453a"/><circle cx="81" cy="39" r="2.6" fill="#d6453a"/>
+    ${face(60, 58, 22, 60, 2.4, 68)}</svg>`,
+  mateo: () => `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${scene('#9ec5e2', '#86b4d6', 'm')}
+    <path d="M30 122 Q30 94 60 90 Q90 94 90 122Z" fill="#e8b44a"/>
+    <rect x="54" y="80" width="12" height="12" fill="#f0c9a4"/>
+    <circle cx="38" cy="62" r="4.6" fill="#f2c9a5"/><circle cx="82" cy="62" r="4.6" fill="#f2c9a5"/>
+    <circle cx="60" cy="62" r="22" fill="${SKIN}"/>
+    <path d="M38 58 Q36 38 60 37 Q84 38 82 58 Q78 48 70 46 Q60 50 50 46 Q42 48 38 58Z" fill="#3b2a20"/>
+    <path d="M57 38 Q60 29 69 33 Q64 35 64 40Z" fill="#3b2a20"/>
+    <path d="M40 41 Q60 29 80 41" stroke="#8a5a2b" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M45 36 L41 22 M41 28 L35 26 M75 36 L79 22 M79 28 L85 26" stroke="#8a5a2b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <circle cx="51" cy="64" r="2.4" fill="${INK}"/><circle cx="69" cy="64" r="2.4" fill="${INK}"/>
+    <circle cx="45" cy="72" r="4.2" fill="${BLUSH}" opacity=".55"/><circle cx="75" cy="72" r="4.2" fill="${BLUSH}" opacity=".55"/>
+    <path d="M53 71 Q60 80 67 71Z" fill="#c4553f" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  mario: () => `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${scene('#f2d27c', '#ecc563', 'o')}
+    <path d="M34 122 Q34 96 60 92 Q86 96 86 122Z" fill="#9cc7e8"/><path d="M60 95 V122" stroke="#7aa9cf" stroke-width="2"/>
+    <circle cx="39" cy="113" r="6" fill="${SKIN}"/><circle cx="81" cy="113" r="6" fill="${SKIN}"/>
+    <circle cx="34" cy="66" r="5" fill="#f2c9a5"/><circle cx="86" cy="66" r="5" fill="#f2c9a5"/>
+    <circle cx="60" cy="64" r="26" fill="${SKIN}"/>
+    <path d="M33 59 Q32 29 60 29 Q88 29 87 59 Q60 51 33 59Z" fill="#f7efe4"/>
+    <rect x="32" y="53" width="56" height="10" rx="5" fill="#d6453a"/><circle cx="60" cy="25" r="7" fill="#d6453a"/>
+    <circle cx="51" cy="70" r="3.1" fill="${INK}"/><circle cx="69" cy="70" r="3.1" fill="${INK}"/>
+    <circle cx="50.2" cy="69" r="1" fill="#fff"/><circle cx="68.2" cy="69" r="1" fill="#fff"/>
+    <circle cx="43" cy="77" r="5" fill="${BLUSH}" opacity=".6"/><circle cx="77" cy="77" r="5" fill="${BLUSH}" opacity=".6"/>
+    <path d="M56 78 Q60 82 64 78" stroke="${INK}" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`
+};
+const PEOPLE = [
+  { id:'raul',   name:'Raul' },
+  { id:'amparo', name:'Amparo' },
+  { id:'mateo',  name:'Mateo' },
+  { id:'mario',  name:'Mario' }
+];
+
+/* ---------- small helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const eur = n => new Intl.NumberFormat('en-IE', { style:'currency', currency:'EUR' }).format(n);
+const YEAR = new Date().getFullYear();
+const CHECK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const COG = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+
+const S = { user:null, items:[], screen:'loading', profile:'', fromCache:false, synced:null, err:'', sheet:null, sure:false };
+let fb = null, unsub = null;
+
+const forPerson = id => S.items.filter(i => i.year === YEAR && i.profile === id).sort((a, b) => (a.createdMs || 0) - (b.createdMs || 0));
+const totalOf = list => list.reduce((s, i) => s + (i.price || 0), 0);
+const hhmm = d => d.toLocaleTimeString('en-IE', { hour:'2-digit', minute:'2-digit' });
+function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; $('#toastHost').appendChild(t); setTimeout(() => t.remove(), 2200); }
+
+/* ---------- Firebase ---------- */
+async function fbInit() {
+  const base = 'https://www.gstatic.com/firebasejs/' + FB_VER + '/';
+  const [appM, authM, fsM] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]);
+  const app = appM.initializeApp(FIREBASE_CONFIG);
+  const auth = authM.getAuth(app);
+  let db;
+  try { db = fsM.initializeFirestore(app, { localCache: fsM.persistentLocalCache({ tabManager: fsM.persistentMultipleTabManager() }) }); }
+  catch (e) { db = fsM.getFirestore(app); }
+  fb = { auth, db, A: authM, F: fsM };
+}
+const col = () => fb.F.collection(fb.db, COLLECTION);
+const ref = id => fb.F.doc(fb.db, COLLECTION, id);
+
+function listen() {
+  stopListen();
+  unsub = fb.F.onSnapshot(col(), snap => {
+    S.items = snap.docs.map(d => Object.assign({ id:d.id }, d.data()));
+    S.fromCache = !!(snap.metadata && snap.metadata.fromCache);
+    if (!S.fromCache) S.synced = new Date();
+    S.err = '';
+    if (S.screen === 'loading' || S.screen === 'login' || S.screen === 'denied') S.screen = 'app';
+    render();
+  }, e => {
+    if (e && e.code === 'permission-denied') { S.screen = 'denied'; render(); }
+    else { S.err = 'Could not reach the server.'; render(); }
+  });
+}
+function stopListen() { if (unsub) { unsub(); unsub = null; } }
+
+/* ---------- drawing the screens ---------- */
+function render() {
+  const app = $('#app');
+  if (S.screen === 'loading') { app.innerHTML = '<div class="center"><h1>Christmas</h1><p>Loading…</p></div>'; renderSheet(); return; }
+  if (S.screen === 'login') {
+    app.innerHTML = `<div class="center"><div class="row">${PEOPLE.map(p => `<span>${ART[p.id]()}</span>`).join('')}</div>
+      <h1>Christmas</h1><p>Our gift ideas, in one place. Sign in with your Google account.</p>
+      <button class="btn pri" data-act="signin">Sign in with Google</button><div class="err" id="loginErr"></div></div>`;
+    renderSheet(); return;
+  }
+  if (S.screen === 'denied') {
+    app.innerHTML = `<div class="center"><h1>Christmas</h1><p>This account is not on the list for this app. Sign out and try the other one.</p>
+      <button class="btn" data-act="signout">Sign out</button></div>`;
+    renderSheet(); return;
+  }
+  const p = PEOPLE.find(x => x.id === S.profile);
+  app.innerHTML = p ? profileHTML(p) : homeHTML();
+  renderSheet();
+}
+
+function homeHTML() {
+  const cards = PEOPLE.map(p => {
+    const it = forPerson(p.id), tot = totalOf(it);
+    const sub = it.length ? it.length + (it.length === 1 ? ' idea' : ' ideas') + (tot ? ' · ' + eur(tot) : '') : 'Nothing yet';
+    return `<a class="card ${p.id}" href="#${p.id}" aria-label="${esc(p.name)}'s list"><span class="art" aria-hidden="true">${ART[p.id]()}</span><span class="nm">${esc(p.name)}</span><span class="sub">${sub}</span></a>`;
+  }).join('');
+  const st = S.err ? S.err : (S.fromCache ? 'Showing the saved copy. Changes sync when you are back online.' : (S.synced ? 'Synced at ' + hhmm(S.synced) : ''));
+  return `<div class="wrap"><header class="top"><h1>Christmas<small>${YEAR}</small></h1>
+    <button class="iconbtn" data-act="settings" aria-label="Settings">${COG}</button></header>
+    <div class="grid">${cards}</div><p class="status">${esc(st)}</p></div>`;
+}
+
+function profileHTML(p) {
+  const it = forPerson(p.id), tot = totalOf(it), got = it.filter(i => i.bought).length;
+  const bits = [it.length + (it.length === 1 ? ' idea' : ' ideas')];
+  if (tot) bits.push(eur(tot));
+  if (got) bits.push(got + ' got');
+  const rows = it.map(i => `<li class="item${i.bought ? ' got' : ''}">
+      <button class="tick" data-act="tick" data-id="${esc(i.id)}" aria-label="${i.bought ? 'Mark as not got' : 'Mark as got'}">${CHECK}</button>
+      <button class="txt" data-act="edit" data-id="${esc(i.id)}"><div class="t1">${esc(i.name)}</div>${i.seller ? `<div class="t2">${esc(i.seller)}</div>` : ''}</button>
+      ${i.price != null ? `<div class="pr">${eur(i.price)}</div>` : ''}</li>`).join('');
+  return `<div class="wrap"><a class="back" href="#">‹ All lists</a>
+    <div class="who"><div class="av" style="background:var(--cream)">${ART[p.id]()}</div><div><h2>${esc(p.name)}</h2><p>${bits.join(' · ')}</p></div></div>
+    ${it.length ? `<ul class="items">${rows}</ul>` : '<div class="empty">Nothing here yet.<br>Add the first idea.</div>'}</div>
+    <button class="fab" data-act="add">+ Add an idea</button>`;
+}
+
+function renderSheet() {
+  const host = $('#sheetHost');
+  const sh = S.sheet;
+  if (!sh) { host.innerHTML = ''; return; }
+  if (sh.mode === 'settings') {
+    host.innerHTML = `<div class="veil" data-act="close"><div class="sheet" role="dialog" aria-label="Settings">
+      <h3>Settings</h3>
+      <div class="kv"><span>App version</span><span>${esc(APP_VERSION)} (${esc(APP_DATE)})</span></div>
+      <div class="sec"><div class="kv"><span>Sync</span><span id="syncTxt">${S.fromCache ? 'Saved copy' : (S.synced ? 'Synced at ' + hhmm(S.synced) : '')}</span></div>
+        <button class="btn" data-act="sync">Sync now</button>
+        <button class="btn" data-act="export">Export backup</button></div>
+      <div class="sec"><div class="kv"><span>Signed in as</span><span>${esc(S.user ? (S.user.email || S.user.displayName || '') : '')}</span></div>
+        <button class="btn" data-act="signout">Sign out</button></div>
+      <button class="btn" data-act="close">Close</button></div></div>`;
+    return;
+  }
+  const edit = sh.mode === 'edit' ? S.items.find(i => i.id === sh.id) : null;
+  const person = PEOPLE.find(x => x.id === S.profile);
+  host.innerHTML = `<div class="veil" data-act="close"><form class="sheet" id="itemForm" role="dialog" aria-label="${edit ? 'Edit idea' : 'Add an idea'}" autocomplete="off">
+    <h3>${edit ? 'Edit idea' : 'Add an idea for ' + esc(person ? person.name : '')}</h3>
+    <label for="fName">What is it?</label><input type="text" id="fName" maxlength="120" required value="${esc(edit ? edit.name : '')}">
+    <div class="row2"><div><label for="fSeller">Seller</label><input type="text" id="fSeller" maxlength="80" placeholder="Shop or website" value="${esc(edit ? edit.seller : '')}"></div>
+    <div><label for="fPrice">Price (€)</label><input type="text" inputmode="decimal" id="fPrice" maxlength="9" placeholder="0.00" value="${edit && edit.price != null ? esc(String(edit.price)) : ''}"></div></div>
+    <div class="err" id="formErr"></div>
+    <div class="btns">${edit ? `<button type="button" class="btn del${S.sure ? ' sure' : ''}" data-act="delete">${S.sure ? 'Tap again to delete' : 'Delete'}</button>` : ''}
+      <button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn pri">Save</button></div></form></div>`;
+  const n = $('#fName'); if (n && !edit) setTimeout(() => n.focus(), 50);
+}
+
+/* ---------- actions ---------- */
+function parsePrice(v) {
+  const t = String(v || '').trim().replace(',', '.').replace(/[^0-9.]/g, '');
+  if (!t) return null;
+  const n = parseFloat(t);
+  return isNaN(n) ? null : Math.min(Math.round(n * 100) / 100, 99999);
+}
+async function saveItem(e) {
+  e.preventDefault();
+  const name = $('#fName').value.trim();
+  if (!name) { $('#formErr').textContent = 'Please add a name.'; return; }
+  const data = { name, seller: $('#fSeller').value.trim(), price: parsePrice($('#fPrice').value), updatedMs: Date.now() };
+  const sh = S.sheet;
+  try {
+    if (sh.mode === 'edit') await fb.F.updateDoc(ref(sh.id), data);
+    else await fb.F.addDoc(col(), Object.assign(data, { profile:S.profile, bought:false, year:YEAR, createdMs:Date.now(), addedBy:S.user.uid, addedByName:((S.user.displayName || '').split(' ')[0]) }));
+    closeSheet();
+  } catch (err) { $('#formErr').textContent = 'Could not save. Check your connection and try again.'; }
+}
+function closeSheet() { S.sheet = null; S.sure = false; renderSheet(); }
+
+document.addEventListener('click', async ev => {
+  const t = ev.target.closest('[data-act]'); if (!t) return;
+  const act = t.dataset.act;
+  if (act === 'close') { if (ev.target !== t && t.classList.contains('veil')) return; closeSheet(); return; }
+  if (act === 'add') { S.sheet = { mode:'add' }; S.sure = false; renderSheet(); }
+  else if (act === 'edit') { S.sheet = { mode:'edit', id:t.dataset.id }; S.sure = false; renderSheet(); }
+  else if (act === 'settings') { S.sheet = { mode:'settings' }; renderSheet(); }
+  else if (act === 'tick') {
+    const it = S.items.find(i => i.id === t.dataset.id); if (!it) return;
+    try { await fb.F.updateDoc(ref(it.id), { bought:!it.bought, updatedMs:Date.now() }); } catch (e) { toast('Could not update'); }
+  }
+  else if (act === 'delete') {
+    if (!S.sure) { S.sure = true; renderSheet(); return; }
+    try { await fb.F.deleteDoc(ref(S.sheet.id)); closeSheet(); } catch (e) { toast('Could not delete'); }
+  }
+  else if (act === 'sync') { listen(); toast('Syncing'); setTimeout(() => { const s = $('#syncTxt'); if (s) s.textContent = S.fromCache ? 'Saved copy' : (S.synced ? 'Synced at ' + hhmm(S.synced) : ''); }, 900); }
+  else if (act === 'export') {
+    const blob = new Blob([JSON.stringify({ app:'Christmas', version:APP_VERSION, exported:new Date().toISOString(), items:S.items }, null, 2)], { type:'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'christmas-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  else if (act === 'signout') { closeSheet(); try { await fb.A.signOut(fb.auth); } catch (e) {} }
+  else if (act === 'signin') {
+    const err = $('#loginErr'); if (err) err.textContent = '';
+    try { await fb.A.signInWithPopup(fb.auth, new fb.A.GoogleAuthProvider()); }
+    catch (e) { if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request' && err) err.textContent = 'Sign in failed. Allow pop ups for this site and try again.'; }
+  }
+});
+document.addEventListener('submit', ev => { if (ev.target.id === 'itemForm') saveItem(ev); });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && S.sheet) closeSheet(); });
+function route() { const h = location.hash.slice(1); S.profile = PEOPLE.some(p => p.id === h) ? h : ''; if (S.screen === 'app') window.scrollTo(0, 0); render(); }
+window.addEventListener('hashchange', route);
+
+(async function main() {
+  route(); S.screen = 'loading'; render();
+  try { await fbInit(); } catch (e) { $('#app').innerHTML = '<div class="center"><h1>Christmas</h1><p>Could not load. Check your connection and reload.</p></div>'; return; }
+  fb.A.onAuthStateChanged(fb.auth, u => {
+    S.user = u;
+    if (!u) { stopListen(); S.items = []; S.screen = 'login'; render(); return; }
+    S.screen = 'loading'; render(); listen();
+  });
+})();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
