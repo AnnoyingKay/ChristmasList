@@ -67,9 +67,13 @@
   .item .thumb { flex:none; width:54px; height:54px; border-radius:12px; object-fit:cover; background:#efe3d0; border:1px solid var(--line); }
   .item .open { flex:none; width:32px; height:32px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--line); background:#fff; text-decoration:none; }
   .item .open svg { width:15px; height:15px; stroke:var(--green); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-  .prev { display:flex; align-items:center; gap:12px; margin-top:10px; min-height:0; }
-  .prev img { width:72px; height:72px; border-radius:14px; object-fit:cover; border:1px solid var(--line); background:#efe3d0; }
-  .prev span { color:var(--mute); font-size:13px; }
+  .prev { margin-top:10px; }
+  .prev > span { display:block; color:var(--mute); font-size:13px; margin-top:4px; }
+  .strip { display:flex; gap:8px; overflow-x:auto; padding:3px 2px 6px; -webkit-overflow-scrolling:touch; }
+  .tile { flex:none; width:76px; height:76px; border-radius:14px; border:2px solid var(--line); background:#efe3d0; padding:0; overflow:hidden; cursor:pointer; display:grid; place-items:center; }
+  .tile img { width:100%; height:100%; object-fit:cover; display:block; }
+  .tile.none { background:#fff; font-size:12px; font-weight:650; color:var(--mute); line-height:1.2; text-align:center; padding:4px; }
+  .tile.on { border-color:var(--green); box-shadow:0 0 0 3px rgba(47,93,80,.22); }
   .empty { text-align:center; color:var(--mute); padding:36px 10px; }
   .fab { position:fixed; left:50%; bottom:max(20px, env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--red); color:#fff; border:0; border-radius:999px; padding:15px 26px; font-weight:700; font-size:16px; box-shadow:0 10px 22px rgba(179,57,47,.35); cursor:pointer; }
 
@@ -89,7 +93,9 @@
   .sec { border-top:1px solid var(--line); margin-top:16px; padding-top: 4px; }
   .kv { display:flex; justify-content:space-between; padding:10px 0; }
   .kv span:first-child { color:var(--mute); }
-  .sheet .btn { margin-top:8px; width:100%; }
+  .sheet > .btn, .sheet .sec > .btn { margin-top:8px; width:100%; }
+  .btns .btn { width:auto; margin-top:0; min-width:0; }
+  .btns .btn.del { padding-left:16px; padding-right:16px; }
   .err { color:var(--red); min-height:20px; font-size:14px; margin-top:10px; }
 
   /* login and loading */
@@ -113,7 +119,7 @@
 'use strict';
 const FB_VER = '10.14.1';
 const COLLECTION = 'xmas';
-const APP_VERSION = '1.1.2';
+const APP_VERSION = '1.2.0';
 const APP_DATE = '2026-11-18';
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyCgVHwUEbDsp_DiyAWbIaHW7b5LS7MRwNM",
@@ -195,46 +201,81 @@ const CHECK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
 const OPEN = '<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
 const COG = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
 
-const S = { user:null, items:[], screen:'loading', profile:'', fromCache:false, synced:null, err:'', sheet:null, sure:false, draft:{ link:'', image:'', for:'', busy:false } };
+const S = { user:null, items:[], screen:'loading', profile:'', fromCache:false, synced:null, err:'', sheet:null, sure:false, draft:{ link:'', image:'', cands:[], for:'', busy:false, msg:'' } };
 let fb = null, unsub = null;
 
 const forPerson = id => S.items.filter(i => i.year === YEAR && i.profile === id).sort((a, b) => (a.createdMs || 0) - (b.createdMs || 0));
 const totalOf = list => list.reduce((s, i) => s + (i.price || 0), 0);
 const hhmm = d => d.toLocaleTimeString('en-IE', { hour:'2-digit', minute:'2-digit' });
 function safeUrl(u) { try { const x = new URL(String(u || '')); return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href : ''; } catch (e) { return ''; } }
+const looksUrl = v => /^(https?:\/\/|www\.)\S+$/i.test(String(v || '').trim());
 function normaliseLink(v) {
   v = String(v || '').trim(); if (!v) return '';
   if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
   return safeUrl(v);
 }
 const PREVIEW_API = 'https://api.microlink.io/?url=';
-async function fetchPreview(link) {
+const GALLERY = '&data.gallery.selector=img&data.gallery.attr=src&data.gallery.type=image&data.gallery.multiple=true';
+const isImageLink = u => /\.(jpe?g|png|webp|gif|avif)(\?.*)?$/i.test(String(u || ''));
+const httpsOnly = u => { const x = safeUrl(u); return x.startsWith('https:') ? x : ''; };
+async function callPreview(url, withGallery) {
   const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 9000);
   try {
-    const r = await fetch(PREVIEW_API + encodeURIComponent(link), { signal:ctl.signal });
+    const r = await fetch(PREVIEW_API + encodeURIComponent(url) + (withGallery ? GALLERY : ''), { signal:ctl.signal });
     const j = await r.json();
-    const d = j && j.data ? j.data : {};
-    const img = (d.image && d.image.url) || '';
-    return { image: safeUrl(img).startsWith('https:') ? safeUrl(img) : '', title: d.title || '', publisher: d.publisher || '' };
+    if (!j || j.status === 'fail' || !j.data) return null;
+    return j.data;
   } catch (e) { return null; } finally { clearTimeout(timer); }
+}
+async function fetchPreview(link) {
+  let d = await callPreview(link, true);
+  if (!d) d = await callPreview(link, false);       /* the extra pictures are a bonus: fall back to the plain lookup */
+  if (!d) return null;
+  const list = [];
+  const add = u => { u = httpsOnly(u); if (u && !/\.svg(\?|$)/i.test(u) && !/(sprite|pixel|spacer|1x1|blank|tracking)/i.test(u) && !list.includes(u)) list.push(u); };
+  add(d.image && d.image.url);
+  (Array.isArray(d.gallery) ? d.gallery : []).forEach(g => add(typeof g === 'string' ? g : (g && g.url)));
+  add(d.logo && d.logo.url);
+  return { images: list.slice(0, 12), title: d.title || '', publisher: d.publisher || '' };
+}
+function paintPicker() {
+  const box = $('#fPrev'); if (!box) return;
+  const c = S.draft.cands;
+  if (!c.length && !S.draft.msg) { box.innerHTML = ''; return; }
+  const tiles = c.map((u, i) => `<button type="button" class="tile${S.draft.image === u ? ' on' : ''}" data-act="pickimg" data-i="${i}" aria-label="Use this picture"><img src="${esc(u)}" alt="" loading="lazy" referrerpolicy="no-referrer"></button>`).join('');
+  box.innerHTML = (c.length ? `<div class="strip"><button type="button" class="tile none${S.draft.image === '' ? ' on' : ''}" data-act="pickimg" data-i="-1">No picture</button>${tiles}</div>` : '') + (S.draft.msg ? `<span>${esc(S.draft.msg)}</span>` : '');
+}
+function setPicture(u) {                      /* a picture pasted by hand: put it first and select it */
+  u = httpsOnly(u); if (!u) return false;
+  S.draft.cands = [u].concat(S.draft.cands.filter(x => x !== u)); S.draft.image = u; S.draft.msg = ''; paintPicker(); return true;
 }
 async function previewFromField() {
   const f = $('#fLink'); if (!f) return;
   const link = normaliseLink(f.value);
-  const box = $('#fPrev');
-  if (!link) { S.draft = { link:'', image:'', for:'', busy:false }; if (box) box.innerHTML = ''; return; }
+  if (!link) return;
   if (S.draft.for === link) return;
-  S.draft = { link, image:'', for:link, busy:true };
-  box.innerHTML = '<span>Looking for a picture…</span>';
+  S.draft.for = link;
+  if (isImageLink(link)) { S.draft.busy = false; setPicture(link); return; }   /* the link is itself a picture */
+  S.draft.busy = true; S.draft.msg = 'Looking for pictures…'; paintPicker();
   const res = await fetchPreview(link);
   if (S.draft.for !== link || !$('#fLink')) return;       /* the link changed or the sheet closed meanwhile */
   S.draft.busy = false;
-  if (!res) { box.innerHTML = '<span>Could not get a preview. You can still save it.</span>'; return; }
-  S.draft.image = res.image;
+  const mine = S.draft.cands.filter(u => u === S.draft.image && S.draft.manual);   /* keep a picture the user pasted */
+  if (!res) { S.draft.msg = 'Could not get a preview. You can still save it, or paste a picture link below.'; paintPicker(); return; }
+  S.draft.cands = mine.concat(res.images.filter(u => !mine.includes(u)));
+  if (!S.draft.manual) S.draft.image = S.draft.cands[0] || '';
+  S.draft.msg = res.images.length ? '' : 'No picture found. You can still save it, or paste a picture link below.';
   const nm = $('#fName'), se = $('#fSeller');
   if (nm && !nm.value.trim() && res.title) nm.value = res.title.slice(0, 120);
   if (se && !se.value.trim() && res.publisher) se.value = res.publisher.slice(0, 80);
-  box.innerHTML = res.image ? `<img src="${esc(res.image)}" alt="" referrerpolicy="no-referrer"><span>Picture found</span>` : '<span>No picture found. You can still save it.</span>';
+  paintPicker();
+}
+function pastePicture() {
+  const f = $('#fImg'); if (!f) return;
+  const v = f.value.trim(); if (!v) return;
+  const u = normaliseLink(v);
+  if (u && httpsOnly(u)) { S.draft.manual = true; setPicture(u); }
+  else { S.draft.msg = 'That picture link needs to start with https://'; paintPicker(); }
 }
 function toast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; $('#toastHost').appendChild(t); setTimeout(() => t.remove(), 2200); }
 
@@ -340,16 +381,20 @@ function renderSheet(force) {
   const person = PEOPLE.find(x => x.id === S.profile);
   host.innerHTML = `<div class="veil" data-act="close"><form class="sheet" id="itemForm" role="dialog" aria-label="${edit ? 'Edit idea' : 'Add an idea'}" autocomplete="off">
     <h3>${edit ? 'Edit idea' : 'Add an idea for ' + esc(person ? person.name : '')}</h3>
-    <label for="fLink">Link (optional)</label><input type="text" id="fLink" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="600" placeholder="Paste a web address" value="${esc(edit ? edit.link : '')}">
-    <div class="prev" id="fPrev">${edit && safeUrl(edit.image) ? `<img src="${esc(safeUrl(edit.image))}" alt="" referrerpolicy="no-referrer">` : ''}</div>
+    <label for="fLink">Link (optional)</label><input type="text" id="fLink" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="600" placeholder="Paste a web address" value="${esc(edit ? (edit.link || (looksUrl(edit.seller) ? edit.seller : '')) : '')}">
+    <div class="prev" id="fPrev"></div>
+    <label for="fImg">Or paste a picture link (optional)</label><input type="text" id="fImg" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="800" placeholder="https://…/photo.jpg">
     <label for="fName">What is it?</label><input type="text" id="fName" maxlength="120" required value="${esc(edit ? edit.name : '')}">
-    <div class="row2"><div><label for="fSeller">Seller</label><input type="text" id="fSeller" maxlength="80" placeholder="Shop or website" value="${esc(edit ? edit.seller : '')}"></div>
+    <div class="row2"><div><label for="fSeller">Seller</label><input type="text" id="fSeller" maxlength="80" placeholder="Shop or website" value="${esc(edit ? (!edit.link && looksUrl(edit.seller) ? '' : edit.seller) : '')}"></div>
     <div><label for="fPrice">Price (€)</label><input type="text" inputmode="decimal" id="fPrice" maxlength="9" placeholder="0.00" value="${edit && edit.price != null ? esc(String(edit.price)) : ''}"></div></div>
     <div class="err" id="formErr"></div>
     <div class="btns">${edit ? `<button type="button" class="btn del${S.sure ? ' sure' : ''}" data-act="delete">${S.sure ? 'Tap again to delete' : 'Delete'}</button>` : ''}
       <button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn pri">Save</button></div></form></div>`;
-  S.draft = { link: edit && edit.link ? edit.link : '', image: edit && edit.image ? edit.image : '', for: edit && edit.link ? edit.link : '', busy:false };
-  const lk = $('#fLink'); if (lk) { lk.addEventListener('input', () => { clearTimeout(window.__pv); window.__pv = setTimeout(previewFromField, 700); }); lk.addEventListener('change', previewFromField); lk.addEventListener('paste', () => setTimeout(previewFromField, 60)); }
+  S.draft = { link: edit && edit.link ? edit.link : '', image: edit && safeUrl(edit.image) ? safeUrl(edit.image) : '', cands: edit && safeUrl(edit.image) ? [safeUrl(edit.image)] : [], for: edit && edit.link ? edit.link : '', busy:false, msg:'', manual:false };
+  paintPicker();
+  const fi = $('#fImg'); if (fi) { fi.addEventListener('change', pastePicture); fi.addEventListener('paste', () => setTimeout(pastePicture, 60)); fi.addEventListener('blur', pastePicture); }
+  const lk = $('#fLink'); if (lk && lk.value && !S.draft.for) setTimeout(previewFromField, 80);
+  if (lk) { lk.addEventListener('input', () => { clearTimeout(window.__pv); window.__pv = setTimeout(previewFromField, 700); }); lk.addEventListener('change', previewFromField); lk.addEventListener('paste', () => setTimeout(previewFromField, 60)); }
   const n = $('#fName'); if (n && !edit) setTimeout(() => n.focus(), 50);
 }
 
@@ -364,12 +409,14 @@ async function saveItem(e) {
   e.preventDefault();
   const name = $('#fName').value.trim();
   if (!name) { $('#formErr').textContent = 'Please add a name.'; return; }
-  const rawLink = $('#fLink').value.trim();
+  let rawLink = $('#fLink').value.trim();
+  let sellerVal = $('#fSeller').value.trim();
+  if (!rawLink && looksUrl(sellerVal)) { rawLink = sellerVal; sellerVal = ''; }
   const link = normaliseLink(rawLink);
   if (rawLink && !link) { $('#formErr').textContent = 'That link does not look right.'; return; }
-  if (link && S.draft.busy) { $('#formErr').textContent = 'Still looking for the picture. Try again in a moment.'; return; }
-  const image = link && S.draft.for === link ? S.draft.image : '';
-  const data = { name, seller: $('#fSeller').value.trim(), price: parsePrice($('#fPrice').value), link, image, updatedMs: Date.now() };
+  if (S.draft.busy) { $('#formErr').textContent = 'Still looking for the picture. Try again in a moment.'; return; }
+  const image = S.draft.image || '';
+  const data = { name, seller: sellerVal, price: parsePrice($('#fPrice').value), link, image, updatedMs: Date.now() };
   const sh = S.sheet;
   try {
     if (sh.mode === 'edit') await fb.F.updateDoc(ref(sh.id), data);
@@ -386,6 +433,7 @@ document.addEventListener('click', async ev => {
   if (act === 'add') { S.sheet = { mode:'add' }; S.sure = false; renderSheet(true); }
   else if (act === 'edit') { S.sheet = { mode:'edit', id:t.dataset.id }; S.sure = false; renderSheet(true); }
   else if (act === 'settings') { S.sheet = { mode:'settings' }; renderSheet(true); }
+  else if (act === 'pickimg') { const i = parseInt(t.dataset.i, 10); S.draft.image = i < 0 ? '' : (S.draft.cands[i] || ''); paintPicker(); }
   else if (act === 'tick') {
     const it = S.items.find(i => i.id === t.dataset.id); if (!it) return;
     try { await fb.F.updateDoc(ref(it.id), { bought:!it.bought, updatedMs:Date.now() }); } catch (e) { toast('Could not update'); }
