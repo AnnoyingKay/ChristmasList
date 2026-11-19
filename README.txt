@@ -1,4 +1,4 @@
-CHRISTMAS v1.2.0 (2026-11-18)
+CHRISTMAS v1.2.2 (2026-11-18)
 
 A shared list of gift ideas. Four cards: Raul, Amparo, Mateo and Mario. Open a card, tap Add an idea, and fill in the name, seller and price. Paste a web address into Link and the app looks for a picture, and fills in the name and shop if they are empty. Tap the circle when something has been bought. Tap an item to edit or delete it.
 
